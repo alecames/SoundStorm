@@ -1,20 +1,28 @@
 <script>
+// @ts-nocheck
+
 	import { formatNumber, formatTime } from '$lib/utils';
+	import { playing } from '$lib/state';
 	import supabase from '$lib/supabase';
 	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import { user } from '$lib/auth';
 
 	export let track = {
 		id: 0,
-		title: 'Track Title',
-		author: 'Track Author',
-		description: 'Track Description',
+		title: '',
+		author: '',
 		likes: 0,
-		views: 0
+		plays: 0,
+		duration: 0
 	};
 
-	const playing = false;
+	/**
+	 * @type {string | any[]}
+	 */
 	let comments = [];
 	let comment = '';
+	let liked = 0;
 
 	const submitComment = async (e) => {
 		e.preventDefault();
@@ -22,19 +30,34 @@
 		if (comment.length > 0) {
 			const { data, error } = await supabase.from('comments').insert([
 				{
-					author: 'alec', // Replace with the current user's username
+					author: $user.username,
 					content: comment,
-					related_track: track.id, // Replace with the current track's ID
+					related_track: track.id,
 					created_at: new Date().toISOString()
 				}
 			]);
 
 			if (error) {
 				console.error('Error submitting comment:', error);
+				comment = '';
 			} else {
 				comment = '';
-				comments = [...comments, data[0]];
+				comments = [...comments, data];
 			}
+		}
+	};
+
+	const likeTrack = async () => {
+		liked = !liked ? 1 : 0;
+		const { data, error } = await supabase
+			.from('tracks')
+			.update({ likes: track.likes + liked })
+			.eq('id', track.id);
+
+		if (error) {
+			console.error('Error liking track:', error);
+		} else {
+			track = data;
 		}
 	};
 
@@ -53,49 +76,63 @@
 
 <div class="card">
 	<div class="play-button">
-		<span class="material-symbols-rounded icon play-icon">play_circle</span>
+		{#if true}
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			<span on:click={() => ($playing = true)} class="material-symbols-outlined icon play-icon"
+				>play_circle</span
+			>
+		{:else}
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			<span on:click={() => ($playing = false)} class="material-symbols-outlined icon play-icon"
+				>pause_circle</span
+			>
+		{/if}
 	</div>
 	<div class="content">
 		<h2 class={`title ${playing ? 'playing' : ''}`}>
 			{track.author ? track.author : 'anonymous'} - {track.title}
 		</h2>
-		<p class="desc">{track.description}</p>
+		{#if track.description}
+			<p class="desc">{track.description}</p>
+		{/if}
 
 		<form class="interactions" on:submit={submitComment}>
 			<div class="comment-section">
-				<p>Comments</p>
-				{#if comments.length > 0}
+				{#if comments && comments.length > 0}
 					<hr class="track-divider" />
 					<div class="comment-list">
 						{#each comments as comment}
-							<div class="comment">
+							<div class="comment" in:slide>
 								<p class="comment-author">{comment.author}</p>
 								<p class="comment-text">{comment.content}</p>
 								<p class="comment-date">&nbsp;•&nbsp;{formatTime(comment.created_at)}</p>
 							</div>
 						{/each}
 					</div>
+				{:else}
+					<p class="no-comments">No comments yet. Be the first to comment on this track!</p>
 				{/if}
 
 				<input
 					name="comment"
 					bind:value={comment}
+					disabled={!$user || !$user.id}
 					class="comment-textfield"
 					type="text"
 					autoCorrect="off"
-					placeholder="Write a comment..."
+					placeholder={$user && $user.id
+						? 'Write a comment...'
+						: 'You must be logged in to comment'}
 				/>
 			</div>
 			<div class="stats">
 				<div class="views">
-					<span class="material-symbols-rounded icon">visibility</span>
+					<span class="material-symbols-rounded icon">play_arrow</span>
 					<span>{formatNumber(track.views)}</span>
 				</div>
-				<div class="likes">
+				<div class="likes" on:click={likeTrack} on:keydown>
+					<span class={`material-symbols-rounded icon ${liked ? 'active' : ''}`}> favorite </span>
 					<span>{formatNumber(track.likes)}</span>
-					<span class={`material-symbols-rounded icon ${track.likes > 0 ? 'active' : ''}`}>
-						favorite
-					</span>
 				</div>
 				<span class="material-symbols-rounded icon">repeat</span>
 				<span class="material-symbols-rounded icon">share</span>
@@ -140,7 +177,6 @@
 		border-top: 1px solid $border
 
 	.interactions
-		width: 100%
 		display: flex
 		gap: 1rem
 		flex-flow: row wrap
@@ -150,6 +186,7 @@
 		.comment-section
 			display: flex
 			flex-direction: column
+			gap: 0.5rem
 			flex: 1 1 50%
 
 			p
@@ -161,12 +198,15 @@
 			gap: 1rem
 			align-items: center
 			margin-bottom: 0.25rem
-			flex: .5
+			flex: 0.5
 
 	.comment-list
 		margin-bottom: 1rem
 		display: flex
 		flex-direction: column
+
+	.no-comments
+		color: fade-out($text,0.4)
 
 	.comment
 		padding: 3px 10px
@@ -195,10 +235,7 @@
 			opacity: 0.5
 
 		&:hover
-
-			background: mix($primary, transparent, 50%)
-			p
-				color: white
+			background: mix($primary, $invert, 90%)
 
 		p
 			margin: 0
@@ -216,6 +253,11 @@
 		align-items: center
 		outline: none
 		border: 1px solid $border
+
+		&::disabled
+			background: darken($background, 50%)
+			color: darken($text, 50%)
+			border: 1px solid darken($border, 50%)
 
 	.likes
 		display: flex

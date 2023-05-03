@@ -10,6 +10,14 @@
 		isTouch
 	} from '$lib/window';
 	import '/src/global.sass';
+	import { user, getSessionUser } from '$lib/auth';
+	import { onMount } from 'svelte';
+
+	$: $isMobile = $windowWidth < 768;
+
+	onMount(async () => {
+		await getSessionUser();
+	});
 </script>
 
 <svelte:window
@@ -27,6 +35,12 @@
 	}}
 />
 
-<main>
+<main class="light">
 	<slot />
 </main>
+
+<style lang="sass">
+@use '/src/variables.sass' as *
+main 
+	width: 100%
+</style>

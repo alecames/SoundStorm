@@ -1,12 +1,18 @@
-$background: #121212
-$primary: #161616
-$secondary: #202020
-$text: rgba(255, 255, 255, 0.87)
-$border: #404040
-$radius: 7px
+$theme: #121212
 $accent: #9264ff
+$invert: invert($theme)
+$background: $theme
+$primary: mix($theme, $invert, 98%)
+$secondary: mix($theme, $invert, 95%)
+$text: fade-out($invert, 0.15)
 $accent-light: lighten($accent, 5%)
 $accent-lighter: lighten($accent-light, 10%)
+
 $hover-accent: mix($accent, transparent, 10%)
 $click-accent: mix($accent, transparent, 70%)
+
 $curve: cubic-bezier(0.08, 0.84, 0.1, 0.97)
+$border: mix($theme, $invert, 80%)
+$radius: 7px
+
+$shadow: 0 0 10px rgba(0, 0, 0, 0.5)

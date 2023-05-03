@@ -18,9 +18,6 @@
 
 body
 	user-select: none
-	margin: 0
-	display: flex
-	place-items: center
 	min-width: 320px
 	min-height: 100vh
 
@@ -43,25 +40,12 @@ a
 .material-symbols-rounded
 	user-select: none !important
 
-.logo-container
-	padding: 10px
-	display: flex
-	justify-content: center
-	align-items: center
-	margin-bottom: 20px
-
 .main
 	margin-left: 240px
 	transition: margin-left 0.5s $curve
 
 	@media (max-width: 768px)
 		margin-left: 0
-
-.logo-line
-	border: none
-	width: 80%
-	border-top: 1px solid $border
-	margin-bottom: 20px
 
 .header
 	background: $background
@@ -105,4 +89,39 @@ a
 	&:active
 		color: $accent-lighter
 
+// things
 
+button
+	display: inline-block
+	width: 100%
+	background: $background
+	border: 1px solid $border
+	border-radius: $radius
+	padding: 0.5rem 1rem
+	font-size: 1rem
+	cursor: pointer
+	transition: all 0.3s $curve
+	color: $text
+
+	&:hover
+		background: mix($background, $accent, 90%)
+		border-color: $border
+
+	&:active
+		background: mix($background, $accent, 40%)
+		border-color: $border
+
+	&:disabled
+		background: $primary
+		border-color: $border
+		color: $text
+
+// utils
+.accent
+	color: $accent-light
+
+gap-sm
+	margin: 1rem 0
+
+gap-md
+	margin: 2rem 0
