@@ -57,6 +57,9 @@
 	padding: 3rem
 	justify-content: center
 
+	@media (max-width: 768px)
+		padding: 1rem
+
 .fab
 	position: fixed
 	bottom: 2rem

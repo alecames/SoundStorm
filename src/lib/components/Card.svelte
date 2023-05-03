@@ -1,5 +1,5 @@
 <script>
-// @ts-nocheck
+	// @ts-nocheck
 
 	import { formatNumber, formatTime } from '$lib/utils';
 	import { playing } from '$lib/state';
@@ -75,23 +75,27 @@
 </script>
 
 <div class="card">
-	<div class="play-button">
-		{#if true}
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<span on:click={() => ($playing = true)} class="material-symbols-outlined icon play-icon"
-				>play_circle</span
-			>
-		{:else}
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<span on:click={() => ($playing = false)} class="material-symbols-outlined icon play-icon"
-				>pause_circle</span
-			>
-		{/if}
-	</div>
 	<div class="content">
-		<h2 class={`title ${playing ? 'playing' : ''}`}>
-			{track.author ? track.author : 'anonymous'} - {track.title}
-		</h2>
+		<div class="top-container">
+			<div class="play-button">
+				{#if true}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<span on:click={() => ($playing = true)} class="material-symbols-outlined icon play-icon"
+						>play_circle</span
+					>
+				{:else}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<span on:click={() => ($playing = false)} class="material-symbols-outlined icon play-icon"
+						>pause_circle</span
+					>
+				{/if}
+			</div>
+			<div>
+				<h2 class={`title ${playing ? 'playing' : ''}`}>
+					{track.author ? track.author : 'anonymous'} - {track.title}
+				</h2>
+			</div>
+		</div>
 		{#if track.description}
 			<p class="desc">{track.description}</p>
 		{/if}
@@ -147,9 +151,8 @@
 
 .card
 	display: flex
-	flex-direction: row
+	flex-flow: column
 	justify-content: left
-	gap: 2rem
 	align-items: center
 	flex: 0 0 auto
 	width: 100%
@@ -159,6 +162,17 @@
 	border-radius: 12px
 	transition: background-color 0.3s $curve
 
+	.top-container
+		display: flex
+		flex-flow: row wrap
+		justify-content: left
+		align-items: center
+		gap: 2rem
+
+		h2
+			margin: 0.5rem 0 
+			padding: 0
+
 	.content
 		width: 100%
 
@@ -166,6 +180,7 @@
 			font-size: 1.5rem
 			margin-bottom: 0.5rem
 			padding: 0
+			color: $accent
 
 		.desc
 			margin-bottom: 0.5rem
@@ -228,7 +243,6 @@
 			overflow: hidden
 			text-overflow: ellipsis
 
-		// second child
 		p:nth-child(3)
 			flex:1
 			font-size: 0.8rem
@@ -244,7 +258,6 @@
 	.comment-textfield
 		color: $text
 		display: flex
-		width: calc(100% - 2rem)
 		background: $background
 		padding: 1rem
 		border-radius: $radius
@@ -287,26 +300,22 @@
 	&:hover .comment-textfield
 		background-color: $primary
 
+	.like-thumb
+		font-size: 1rem
+		color: $text
+
+	.like-container
+		display: flex
+		flex-direction: row
+		align-items: center
+		justify-content: center
+		gap: 0.5rem
+
 .play-icon
 	font-size: 3rem
 	&:active
 		scale: 1
 
-.play-button
-	align-self: start
-	padding-top: 1rem
-
 .playing
 	color: $accent-light
-
-.like-thumb
-	font-size: 1rem
-	color: $text
-
-.like-container
-	display: flex
-	flex-direction: row
-	align-items: center
-	justify-content: center
-	gap: 0.5rem
 </style>
