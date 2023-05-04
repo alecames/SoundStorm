@@ -7,6 +7,7 @@
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { user } from '$lib/auth';
+	import { writable } from 'svelte/store';
 
 	export let track = {
 		id: 0,
@@ -23,6 +24,7 @@
 	let comments = [];
 	let comment = '';
 	let liked = 0;
+	let overflowMenu = false;
 
 	const submitComment = async (e) => {
 		e.preventDefault();
@@ -32,118 +34,128 @@
 				{
 					author: $user.username,
 					content: comment,
-					related_track: track.id,
-					created_at: new Date().toISOString()
+					related_track: track.id
 				}
 			]);
 
 			if (error) {
 				console.error('Error submitting comment:', error);
-				comment = '';
 			} else {
 				comment = '';
-				comments = [...comments, data];
 			}
 		}
+		await fetchComments();
 	};
 
-	const likeTrack = async () => {
-		liked = !liked ? 1 : 0;
-		const { data, error } = await supabase
-			.from('tracks')
-			.update({ likes: track.likes + liked })
-			.eq('id', track.id);
+	const likeTrack = async () => {};
 
-		if (error) {
-			console.error('Error liking track:', error);
-		} else {
-			track = data;
-		}
-	};
+	function repost() {
+		console.log('repost');
+	}
 
-	onMount(async () => {
+	function share() {
+		console.log('share');
+	}
+
+	function showOptions() {
+		overflowMenu = !overflowMenu;
+	}
+
+	async function fetchComments() {
 		const { data, error } = await supabase
 			.from('comments')
 			.select('author, content, created_at')
 			.eq('related_track', track.id);
 
 		if (error) {
+			console.error('Error fetching comments:', error);
 		} else {
 			comments = data;
 		}
+	}
+
+	onMount(async () => {
+		fetchComments();
 	});
 </script>
 
 <div class="card">
-	<div class="content">
-		<div class="top-container">
-			<div class="play-button">
-				{#if true}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<span on:click={() => ($playing = true)} class="material-symbols-outlined icon play-icon"
-						>play_circle</span
-					>
-				{:else}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<span on:click={() => ($playing = false)} class="material-symbols-outlined icon play-icon"
-						>pause_circle</span
-					>
-				{/if}
+	{#if track && track.id}
+		<div class="content">
+			<div class="top-container">
+				<div class="play-button">
+					{#if true}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<span
+							on:click={() => ($playing = true)}
+							class="material-symbols-outlined icon play-icon">play_circle</span
+						>
+					{:else}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<span
+							on:click={() => ($playing = false)}
+							class="material-symbols-outlined icon play-icon">pause_circle</span
+						>
+					{/if}
+				</div>
+				<div>
+					<h2 class={`${playing ? 'playing' : ''}`}>
+						<span class="accent">{track.author ? track.author : 'anonymous'}</span> - {track.title}
+					</h2>
+				</div>
 			</div>
-			<div>
-				<h2 class={`title ${playing ? 'playing' : ''}`}>
-					{track.author ? track.author : 'anonymous'} - {track.title}
-				</h2>
-			</div>
-		</div>
-		{#if track.description}
-			<p class="desc">{track.description}</p>
-		{/if}
+			{#if track.description}
+				<p class="desc">{track.description}</p>
+			{/if}
 
-		<form class="interactions" on:submit={submitComment}>
-			<div class="comment-section">
-				{#if comments && comments.length > 0}
-					<hr class="track-divider" />
-					<div class="comment-list">
-						{#each comments as comment}
-							<div class="comment" in:slide>
-								<p class="comment-author">{comment.author}</p>
-								<p class="comment-text">{comment.content}</p>
-								<p class="comment-date">&nbsp;•&nbsp;{formatTime(comment.created_at)}</p>
-							</div>
-						{/each}
+			<form class="interactions" on:submit={submitComment}>
+				<div class="comment-section">
+					{#if comments && comments.length > 0}
+						<hr class="track-divider" />
+						<div class="comment-list">
+							{#each comments as comment}
+								<div class="comment" in:slide>
+									<p class="comment-author">{comment.author}</p>
+									<p class="comment-text">{comment.content}</p>
+									<p class="comment-date">&nbsp;•&nbsp;{formatTime(comment.created_at)}</p>
+								</div>
+							{/each}
+						</div>
+					{:else}
+						<div class="comment-list">
+							<p class="no-comments">No comments yet. Be the first to comment on this track!</p>
+						</div>
+					{/if}
+					<input
+						name="comment"
+						bind:value={comment}
+						disabled={!$user || !$user.id}
+						class="comment-textfield"
+						type="text"
+						autoCorrect="off"
+						placeholder={$user && $user.id
+							? 'Write a comment...'
+							: 'You must be logged in to comment'}
+					/>
+				</div>
+				<div class="stats">
+					<div class="views">
+						<span class="material-symbols-rounded icon">play_arrow</span>
+						<span>{formatNumber(track.views)}</span>
 					</div>
-				{:else}
-					<p class="no-comments">No comments yet. Be the first to comment on this track!</p>
-				{/if}
-
-				<input
-					name="comment"
-					bind:value={comment}
-					disabled={!$user || !$user.id}
-					class="comment-textfield"
-					type="text"
-					autoCorrect="off"
-					placeholder={$user && $user.id
-						? 'Write a comment...'
-						: 'You must be logged in to comment'}
-				/>
-			</div>
-			<div class="stats">
-				<div class="views">
-					<span class="material-symbols-rounded icon">play_arrow</span>
-					<span>{formatNumber(track.views)}</span>
+					<div class="likes" on:click={likeTrack} on:keydown>
+						<span class={`material-symbols-rounded icon ${liked ? 'active' : ''}`}> favorite </span>
+						<span>{formatNumber(track.likes)}</span>
+					</div>
+					<span on:click={repost} on:keydown class="material-symbols-rounded icon">repeat</span>
+					<span on:click={share} on:keydown class="material-symbols-rounded icon">share</span>
+					<span on:click={showOptions} on:keydown class="material-symbols-rounded icon"
+						>more_vert</span
+					>
 				</div>
-				<div class="likes" on:click={likeTrack} on:keydown>
-					<span class={`material-symbols-rounded icon ${liked ? 'active' : ''}`}> favorite </span>
-					<span>{formatNumber(track.likes)}</span>
-				</div>
-				<span class="material-symbols-rounded icon">repeat</span>
-				<span class="material-symbols-rounded icon">share</span>
-				<span class="material-symbols-rounded icon">more_vert</span>
-			</div>
-		</form>
-	</div>
+			</form>
+		</div>
+	{/if}
 </div>
 
 <style lang="sass">
@@ -167,11 +179,8 @@
 		flex-flow: row wrap
 		justify-content: left
 		align-items: center
-		gap: 2rem
+		gap: 1rem
 
-		h2
-			margin: 0.5rem 0 
-			padding: 0
 
 	.content
 		width: 100%
@@ -180,7 +189,6 @@
 			font-size: 1.5rem
 			margin-bottom: 0.5rem
 			padding: 0
-			color: $accent
 
 		.desc
 			margin-bottom: 0.5rem
@@ -255,23 +263,6 @@
 			margin: 0
 			padding: 0
 
-	.comment-textfield
-		color: $text
-		display: flex
-		background: $background
-		padding: 1rem
-		border-radius: $radius
-		flex-direction: row
-		justify-content: left
-		align-items: center
-		outline: none
-		border: 1px solid $border
-
-		&::disabled
-			background: darken($background, 50%)
-			color: darken($text, 50%)
-			border: 1px solid darken($border, 50%)
-
 	.likes
 		display: flex
 		flex-direction: row
@@ -313,9 +304,14 @@
 
 .play-icon
 	font-size: 3rem
+	line-height: 1.3
 	&:active
 		scale: 1
 
-.playing
-	color: $accent-light
+h2
+	font-size: 1.5rem
+	line-height: 1
+	font-weight: 500
+	margin: 0
+	padding: 0
 </style>

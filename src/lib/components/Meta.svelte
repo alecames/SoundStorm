@@ -2,6 +2,12 @@
 	export let title = 'SoundStorm';
 	export let desc = 'Share and stream your music';
 	export let image = 'meta.png';
+
+	if (title == 'SoundStorm') {
+		title = 'SoundStorm • Share and stream your music';
+	} else {
+		title = title + ' • SoundStorm';
+	}
 </script>
 
 <svelte:head>

@@ -9,9 +9,16 @@
 		isMobile,
 		isTouch
 	} from '$lib/window';
-	import '/src/global.sass';
 	import { user, getSessionUser } from '$lib/auth';
 	import { onMount } from 'svelte';
+	import { title } from '$lib/state';
+	import { slide } from 'svelte/transition';
+	import Sidebar from '$lib/components/Sidebar.svelte';
+	import '/src/global.sass';
+	import PageTransition from '$lib/components/PageTransition.svelte';
+
+	let scrolled = false;
+	$: scrolled = $scrollY > 30;
 
 	$: $isMobile = $windowWidth < 768;
 
@@ -35,8 +42,20 @@
 	}}
 />
 
-<main class="light">
-	<slot />
+<main>
+	<Sidebar />
+	<div class={`header ${scrolled ? 'scrolled' : ''}`}>
+		{#key $title}
+			<h1 in:slide={{ duration: 250, delay: 251 }} out:slide={{ duration: 250 }}>
+				{$title}
+			</h1>
+		{/key}
+	</div>
+	{#key $title}
+		<PageTransition>
+			<slot />
+		</PageTransition>
+	{/key}
 </main>
 
 <style lang="sass">

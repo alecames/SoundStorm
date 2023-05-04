@@ -1,6 +1,7 @@
 @use '/src/variables.sass' as *
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css")
 
 :root
 	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif
@@ -41,6 +42,7 @@ a
 	user-select: none !important
 
 .main
+	margin-top: 8rem
 	margin-left: 240px
 	transition: margin-left 0.5s $curve
 
@@ -92,12 +94,13 @@ a
 // things
 
 button
+	font-family: inherit
 	display: inline-block
-	width: 100%
+	max-width: 100%
 	background: $background
 	border: 1px solid $border
 	border-radius: $radius
-	padding: 0.5rem 1rem
+	padding: 0.75rem 1rem
 	font-size: 1rem
 	cursor: pointer
 	transition: all 0.3s $curve
@@ -116,6 +119,81 @@ button
 		border-color: $border
 		color: $text
 
+	&.alt
+		background: $secondary
+		color: $text
+		border: 1px solid transparent
+
+		&:hover
+			background: lighten($secondary, 10%)
+
+		&:active
+			background: $primary
+
+		&:disabled
+			background: $secondary
+
+input, textarea
+	color: $text
+	font-family: inherit
+	font-size: 1rem
+	display: flex
+	background: $background
+	padding: 1rem
+	border-radius: $radius
+	flex-direction: row
+	justify-content: left
+	align-items: center
+	outline: none
+	border: 1px solid $border
+
+	&:focus
+		border-color: $accent
+		background: $background
+		color: $text
+
+	&:autofill
+		background: $background
+		color: $text
+
+	&:hover
+		border-color: $accent
+		background: $background
+		color: $text
+
+	&::disabled
+		background: darken($background, 50%)
+		color: darken($text, 50%)
+		border-color: darken($border, 50%)
+
+label
+	background: $background
+	padding: 0 0.5rem
+	color: fade-out($text, 0.5)
+	display: inline-flex
+	transition: all 1s $curve
+	pointer-events: none
+	user-select: none
+
+input
+	width: calc(100% - 2rem)
+
+input + label
+	transform: translate(10%, -270%)
+
+input[data-value=""] + label
+	transform: translate(20%, -160%)
+
+input:focus-within + label
+	transform: translate(20%, -270%)
+	color: $text
+
+.error
+	color: $error
+
+.success
+	color: $success
+
 // utils
 .accent
 	color: $accent-light
@@ -125,3 +203,18 @@ gap-sm
 
 gap-md
 	margin: 2rem 0
+
+gap-lg
+	margin: 4rem 0
+
+gap-xl
+	margin: 8rem 0
+
+.row
+	display: flex
+	flex-flow: row
+	gap: 1rem
+	align-items: center
+
+	&-wrap
+		flex-flow: row wrap

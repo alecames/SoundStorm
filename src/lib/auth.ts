@@ -15,7 +15,6 @@ export async function getSessionUser() {
 		if (session && session.user) {
 			const { user: authUser } = session;
 
-			// Fetch the user's profile data from the profiles table
 			const { data: profileData, error: profileError } = await supabase
 				.from('profiles')
 				.select('username, name')
@@ -24,7 +23,6 @@ export async function getSessionUser() {
 
 			if (profileError) throw profileError;
 
-			// Add the username and name fields to the user object
 			const userWithProfile = {
 				...authUser,
 				username: profileData.username,
@@ -42,15 +40,14 @@ export async function getSessionUser() {
 }
 
 // handle logins
-export const login = async (email) => {
+export const signInWithMagicLink = async (email: string) => {
 	try {
 		const { error } = await supabase.auth.signInWithOtp({ email });
 		if (error) throw error;
-		console.log('Check your email for a login link');
+		return { type: 'success', message: 'Check your email for the login link!' };
 	} catch (error) {
-		console.log('Error thrown:', error.message);
+		return { type: 'error', message: error.message };
 	}
-	return;
 };
 
 export async function signInWithGoogle() {
@@ -65,15 +62,48 @@ export async function signInWithGoogle() {
 	});
 }
 
-export const logout = async () => {
+export async function changeUsername(userId: string, username: string) {
+	try {
+		const { error } = await supabase.from('profiles').update({ username }).eq('id', userId);
+
+		if (error) throw error;
+		return { type: 'success', message: 'Username updated!' };
+	} catch (error) {
+		return { type: 'error', message: error.message };
+	}
+}
+
+export async function changeName(userId: string, name: string) {
+	try {
+		const { error } = await supabase.from('profiles').update({ name: name }).eq('id', userId);
+
+		if (error) throw error;
+		return { type: 'success', message: 'Name updated!' };
+	} catch (error) {
+		return { type: 'error', message: error.message };
+	}
+}
+
+export async function deleteAccount(userId: string) {
+	try {
+		const { error } = await supabase.from('profiles').delete().eq('id', userId);
+
+		if (error) throw error;
+		return { type: 'success', message: 'Account deleted!' };
+	} catch (error) {
+		return { type: 'error', message: error.message };
+	}
+}
+
+export const signOut = async () => {
 	try {
 		const { error } = await supabase.auth.signOut();
 		location.reload();
 
 		if (error) throw error;
-		console.log('Logged out');
+		return { type: 'success', message: 'Logged out!' };
 	} catch (error) {
-		console.log('Error thrown:', error.message);
+		return { type: 'error', message: error.message };
 	}
 	return;
 };

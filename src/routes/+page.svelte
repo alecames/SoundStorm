@@ -1,16 +1,12 @@
 <script lang="ts">
-	import { scrollY } from '$lib/window';
 	import supabase from '$lib/supabase';
 	import Card from '$lib/components/Card.svelte';
 	import Meta from '$lib/components/Meta.svelte';
-	import Sidebar from '$lib/components/Sidebar.svelte';
 	import { onMount } from 'svelte';
 	import { user } from '$lib/auth';
+	import { title } from '$lib/state';
 
 	let tracks: any[] = [];
-
-	let scrolled = false;
-	$: scrolled = $scrollY > 30;
 
 	function addTrack() {
 		console.log('add track');
@@ -26,15 +22,13 @@
 			tracks = data;
 		}
 	});
+
+	$title = 'Home';
 </script>
 
-<Meta title="Home • SoundStorm" />
+<Meta title={$title} />
 
-<div class="main">
-	<Sidebar />
-	<div class={`header ${scrolled ? 'scrolled' : ''}`}>
-		<h1>Home</h1>
-	</div>
+<section class="main">
 	<div class="card-container">
 		{#each tracks as track}
 			<Card {track} />
@@ -45,16 +39,15 @@
 			<span class="material-symbols-outlined icon">add</span>
 		</button>
 	{/if}
-</div>
+</section>
 
 <style lang="sass">
 @use '/src/variables.sass' as *
 .card-container
 	display: flex
 	flex-wrap: wrap
-	margin-top: 5rem
 	gap: 2rem
-	padding: 3rem
+	padding: 0 3rem
 	justify-content: center
 
 	@media (max-width: 768px)

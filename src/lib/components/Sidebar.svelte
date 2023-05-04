@@ -1,35 +1,35 @@
 <script lang="ts">
+	import { showLoginModal } from '$lib/state';
 	import { slide } from 'svelte/transition';
-	import { user, signInWithGoogle, logout } from '$lib/auth';
+	import Modal from '$lib/components/SignInModal.svelte';
+	import { user, signOut } from '$lib/auth';
+	import { page } from '$app/stores';
 
 	const sidebarItems = [
 		{
 			label: 'Home',
-			href: '/',
-			subItems: []
+			href: '/'
 		},
 		{
 			label: 'Explore',
-			href: '/explore',
-			subItems: []
+			href: '/explore'
 		},
 		{
-			label: 'Library',
-			href: '/library',
-			subItems: []
+			label: 'My Profile',
+			href: '/profile'
 		},
 		{
 			label: 'Liked',
-			href: '/liked',
-			subItems: []
+			href: '/liked'
 		},
 		{
 			label: 'Settings',
-			href: '/settings',
-			subItems: []
+			href: '/settings'
 		}
 	];
 </script>
+
+<Modal />
 
 <div class="sidebar">
 	<a href="/" class="logo-container" data-home="true">
@@ -38,28 +38,30 @@
 	<hr class="logo-line" />
 	<div>
 		{#each sidebarItems as item}
-			{#if item.subItems.length > 0}
-				{#each item.subItems as subItem}
-					<div class="sidebar-item button">
-						<a href={item.href}>{item.label}</a>
-					</div>
-				{/each}
-			{:else}
-				<div class="sidebar-item button">
-					<a href={item.href}>{item.label}</a>
-				</div>
-			{/if}
+			<div class="sidebar-item button">
+				<a href={item.href} aria-current={$page.url.pathname === item.href ? 'page' : undefined}
+					>{item.label}</a
+				>
+			</div>
 		{/each}
 		<hr class="logo-line" />
 		<div class="sidebar-item">
-			{#if $user && $user.email}
-				<span class="accent" style="display:flex;align-items:center;gap:0.5rem" in:slide>
-					<span class="material-symbols-rounded">account_circle</span>
-					{$user.username}
-				</span>
-				<button on:click={logout}> Log Out </button>
+			{#if $user && $user.aud}
+				<div class="sidebar-item button">
+					<a href="/account" aria-current={$page.url.pathname === '/account' ? 'page' : undefined}>
+						<span class="accent" style="display:flex;align-items:center;gap:0.5rem" in:slide>
+							<span class="material-symbols-rounded">account_circle</span>
+							{$user.username}
+						</span>
+					</a>
+				</div>
+				<button on:click={signOut}
+					>Sign Out<span class="material-symbols-rounded">logout</span></button
+				>
 			{:else}
-				<button on:click={signInWithGoogle}> Log In </button>
+				<button on:click={() => ($showLoginModal = true)}
+					>Sign In<span class="material-symbols-rounded">login</span>
+				</button>
 			{/if}
 		</div>
 	</div>
@@ -76,6 +78,9 @@
 	top: 0
 	background-color: $background
 	display: flex
+	overflow: hidden
+	white-space: nowrap
+	text-overflow: ellipsis
 	flex-direction: column
 	padding: 20px
 	border-right: 1px solid $border
@@ -84,6 +89,17 @@
 
 	@media (max-width: 768px)
 		transform: translateX(-100%)
+
+
+	button 
+		display: flex
+		align-items: center
+		width: 100%
+		justify-content: center
+		gap: 0.5rem
+		
+		span
+			font-size: 1rem
 
 	&-item
 		margin-bottom: 10px
@@ -102,6 +118,7 @@
 			display: flex
 			align-items: center
 			justify-content: left
+			border-radius: $radius
 			padding: 7px
 			width: 100%
 			height: 100%
@@ -119,10 +136,9 @@
 	justify-content: center
 	align-items: center
 	scale: 1
-	transition: scale 0.5s $curve
 
 	&:hover 
-		scale: 1.1
+		filter: brightness(0)  invert(85%) sepia(14%) saturate(4073%) hue-rotate(203deg) brightness(82%) contrast(104%)
 
 .logo-line
 	border: none
@@ -130,4 +146,7 @@
 	border-top: 1px solid $border
 	margin: 20px 0
 
+a[aria-current="page"]
+	color: $accent
+	font-weight: 600
 </style>
