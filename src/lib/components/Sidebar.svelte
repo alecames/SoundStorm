@@ -122,6 +122,10 @@
 			padding: 7px
 			width: 100%
 			height: 100%
+			transition: all 0.5s $curve
+
+			&[aria-current="page"]
+				color: $accent
 
 		&.button:hover
 			background-color: $hover-accent
@@ -136,9 +140,10 @@
 	justify-content: center
 	align-items: center
 	scale: 1
+	transition: filter 0.5s $curve
 
 	&:hover 
-		filter: brightness(0)  invert(85%) sepia(14%) saturate(4073%) hue-rotate(203deg) brightness(82%) contrast(104%)
+		filter: brightness(0) invert(81%) sepia(9%) saturate(2107%) hue-rotate(109deg) brightness(92%) contrast(115%)
 
 .logo-line
 	border: none
@@ -146,7 +151,5 @@
 	border-top: 1px solid $border
 	margin: 20px 0
 
-a[aria-current="page"]
-	color: $accent
-	font-weight: 600
+
 </style>

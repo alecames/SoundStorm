@@ -1,7 +1,7 @@
 <script>
 	// @ts-nocheck
 
-	import { formatNumber, formatTime } from '$lib/utils';
+	import { formatNumber, relativeTime, readableNumber, absoluteTime } from '$lib/utils';
 	import { playing } from '$lib/state';
 	import supabase from '$lib/supabase';
 	import { onMount } from 'svelte';
@@ -85,15 +85,15 @@
 			<div class="top-container">
 				<div class="play-button">
 					{#if true}
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<span
 							on:click={() => ($playing = true)}
+							on:keydown
 							class="material-symbols-outlined icon play-icon">play_circle</span
 						>
 					{:else}
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<span
 							on:click={() => ($playing = false)}
+							on:keydown
 							class="material-symbols-outlined icon play-icon">pause_circle</span
 						>
 					{/if}
@@ -101,6 +101,9 @@
 				<div>
 					<h2 class={`${playing ? 'playing' : ''}`}>
 						<span class="accent">{track.author ? track.author : 'anonymous'}</span> - {track.title}
+						<span class="date-posted" title={absoluteTime(track.created_at)}
+							>{relativeTime(track.created_at)}</span
+						>
 					</h2>
 				</div>
 			</div>
@@ -117,7 +120,9 @@
 								<div class="comment" in:slide>
 									<p class="comment-author">{comment.author}</p>
 									<p class="comment-text">{comment.content}</p>
-									<p class="comment-date">&nbsp;•&nbsp;{formatTime(comment.created_at)}</p>
+									<p class="comment-date" title={absoluteTime(comment.created_at)}>
+										&nbsp;•&nbsp;{relativeTime(comment.created_at)}
+									</p>
 								</div>
 							{/each}
 						</div>
@@ -139,15 +144,19 @@
 					/>
 				</div>
 				<div class="stats">
-					<div class="views">
+					<div class="views" title="{readableNumber(track.views)} views">
 						<span class="material-symbols-rounded icon">play_arrow</span>
 						<span>{formatNumber(track.views)}</span>
 					</div>
-					<div class="likes" on:click={likeTrack} on:keydown>
+					<div
+						class="likes"
+						on:click={likeTrack}
+						on:keydown
+						title="{readableNumber(track.likes)} likes"
+					>
 						<span class={`material-symbols-rounded icon ${liked ? 'active' : ''}`}> favorite </span>
 						<span>{formatNumber(track.likes)}</span>
 					</div>
-					<span on:click={repost} on:keydown class="material-symbols-rounded icon">repeat</span>
 					<span on:click={share} on:keydown class="material-symbols-rounded icon">share</span>
 					<span on:click={showOptions} on:keydown class="material-symbols-rounded icon"
 						>more_vert</span
@@ -181,6 +190,11 @@
 		align-items: center
 		gap: 1rem
 
+	.date-posted
+		color: fade-out($text, 0.5)
+		vertical-align: center
+		font-size: 0.8rem
+		margin-left: 0.5rem
 
 	.content
 		width: 100%

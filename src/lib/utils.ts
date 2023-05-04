@@ -12,7 +12,7 @@ export const formatNumber = (num: number) => {
 	}
 };
 
-export const formatTime = (time: string) => {
+export const relativeTime = (time: string) => {
 	const date = new Date(time);
 	const now = new Date();
 	const diff = now.getTime() - date.getTime();
@@ -42,4 +42,21 @@ export const formatTime = (time: string) => {
 		return `${seconds} seconds ago`;
 	}
 	return 'just now';
+};
+
+export const absoluteTime = (time: string) => {
+	const date = new Date(time);
+	const month = date.toLocaleString('default', { month: 'long' });
+	const day = date.getDate();
+	const year = date.getFullYear();
+	const hour = date.getHours();
+	const minute = date.getMinutes();
+	const ampm = hour >= 12 ? 'PM' : 'AM';
+	const hour12 = hour % 12 || 12;
+
+	return `${month} ${day}, ${year} at ${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
+};
+
+export const readableNumber = (num: number) => {
+	return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
